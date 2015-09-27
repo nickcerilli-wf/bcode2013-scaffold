@@ -14,20 +14,17 @@ public class RobotPlayer {
         while (true) {
             try {
             	
-            	//double power = rc.getTeamPower();
-            	//double health = rc.getEnergon();
-            	//double shields = rc.getShields();
-            	
                 if (rc.getType() == RobotType.HQ) {
                 	int currentRound = Clock.getRoundNum();
                     if (rc.isActive()) {
-                        // Spawn a soldier
                         Direction dir = Direction.values()[(int)(Math.random()*8)];
-                        if (rc.canMove(dir) && currentRound % 7 == 0)
+                        if (rc.canMove(dir) && currentRound % 10 == 0)
                             rc.spawn(dir);
-                        if (rc.checkResearchProgress(Upgrade.PICKAXE) <= 25)
+                        if (!rc.hasUpgrade(Upgrade.DEFUSION))
+                        	rc.researchUpgrade(Upgrade.DEFUSION);
+                        else if (!rc.hasUpgrade(Upgrade.PICKAXE))
                         	rc.researchUpgrade(Upgrade.PICKAXE);
-                        if(currentRound > 600)
+                        else if(currentRound > 600)
                         	rc.researchUpgrade(Upgrade.NUKE);
                     }
                 }
@@ -36,50 +33,42 @@ public class RobotPlayer {
                         //rc.attackSquare(rc.getLocation());
                     }
                 }
-                else if (rc.getType() == RobotType.GENERATOR) {
-                    if (rc.isActive()) {
-                    	;
-                    }
-                }
-                else if (rc.getType() == RobotType.MEDBAY) {
-                    if (rc.isActive()) {
-                    	;
-                    }
-                }
-                else if (rc.getType() == RobotType.SHIELDS) {
-                    if (rc.isActive()) {
-                    	;
-                    }
-                }
+
                 else if (rc.getType() == RobotType.SOLDIER) {
                     if (rc.isActive()) {
                     	MapLocation currentLocation = rc.getLocation(); 
                     	MapLocation enemyHQLocation = rc.senseEnemyHQLocation();
-                    	Direction dir = currentLocation.directionTo(enemyHQLocation);
+                    	Direction directionToEnemyBase = currentLocation.directionTo(enemyHQLocation);
                     	
-                    	MapLocation nextLocation = currentLocation.add(dir);
+                    	MapLocation nextLocation = currentLocation.add(directionToEnemyBase);
                     	
-                    	if(rc.senseMine(nextLocation) == Team.NEUTRAL
+                    	
+                    	if(rc.senseHQLocation().equals(nextLocation)){
+                    		Direction nextDirection = Direction.values()[(int)(Math.random()*8)];
+							if(rc.canMove(nextDirection)) {
+								rc.move(nextDirection);
+							}
+                    	}
+                    	
+                    	else if(rc.senseMine(nextLocation) == Team.NEUTRAL
                     			|| rc.senseMine(nextLocation) == Team.B)
                     		rc.defuseMine(nextLocation);
+
+                    		
                     	
-                    	else if (Math.random()<0.005 
+                    	else if (Math.random()<0.05 
 							&& rc.hasUpgrade(Upgrade.PICKAXE)
 							&& rc.senseMine(currentLocation) == null) {
 								rc.layMine();
 						} 
+                    	
+                    	
                     	else { 
-							// Choose a random direction, and move that way if possible
-							if(rc.canMove(dir)) {
-								rc.move(dir);
-								
+							if(rc.canMove(directionToEnemyBase) && Math.random() < 0.2) {
+								rc.move(directionToEnemyBase);
 							}
+								
 						}
-                    }
-                }
-                else if (rc.getType() == RobotType.SUPPLIER) {
-                    if (rc.isActive()) {
-                    	;
                     }
                 }
             } 
