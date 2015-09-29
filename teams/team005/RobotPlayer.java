@@ -34,7 +34,7 @@ public class RobotPlayer {
                         	rc.researchUpgrade(Upgrade.PICKAXE);
                         
                         
-                        else if(currentRound > 600)
+                        else if(currentRound > 200)
                         	rc.researchUpgrade(Upgrade.NUKE);
                     }
                 }
