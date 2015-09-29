@@ -18,12 +18,22 @@ public class RobotPlayer {
                 	int currentRound = Clock.getRoundNum();
                     if (rc.isActive()) {
                         Direction dir = Direction.values()[(int)(Math.random()*8)];
-                        if (rc.canMove(dir) && currentRound % 10 == 0)
+                        
+                        
+                        
+                        
+                        if (rc.canMove(dir) && currentRound % 10 == 0 && currentRound < 600)
                             rc.spawn(dir);
+                        
+                        
                         if (!rc.hasUpgrade(Upgrade.DEFUSION))
                         	rc.researchUpgrade(Upgrade.DEFUSION);
+                        
+                        
                         else if (!rc.hasUpgrade(Upgrade.PICKAXE))
                         	rc.researchUpgrade(Upgrade.PICKAXE);
+                        
+                        
                         else if(currentRound > 600)
                         	rc.researchUpgrade(Upgrade.NUKE);
                     }
@@ -36,6 +46,7 @@ public class RobotPlayer {
 
                 else if (rc.getType() == RobotType.SOLDIER) {
                     if (rc.isActive()) {
+                    	Team myTeam = rc.getTeam();
                     	MapLocation currentLocation = rc.getLocation(); 
                     	MapLocation enemyHQLocation = rc.senseEnemyHQLocation();
                     	Direction directionToEnemyBase = currentLocation.directionTo(enemyHQLocation);
@@ -51,7 +62,7 @@ public class RobotPlayer {
                     	}
                     	
                     	else if(rc.senseMine(nextLocation) == Team.NEUTRAL
-                    			|| rc.senseMine(nextLocation) == Team.B)
+                    			|| rc.senseMine(nextLocation) == myTeam.opponent() )
                     		rc.defuseMine(nextLocation);
 
                     		
