@@ -4,6 +4,7 @@ import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
+import battlecode.common.Robot;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -22,19 +23,16 @@ public class RobotPlayer {
                         
                         
                         
-                        if (rc.canMove(dir) && currentRound % 10 == 0 && currentRound < 600)
+                        if (rc.canMove(dir) && currentRound % 11 == 0 && currentRound < 500)
                             rc.spawn(dir);
                         
-                        
-                        if (!rc.hasUpgrade(Upgrade.DEFUSION))
-                        	rc.researchUpgrade(Upgrade.DEFUSION);
                         
                         
                         else if (!rc.hasUpgrade(Upgrade.PICKAXE))
                         	rc.researchUpgrade(Upgrade.PICKAXE);
                         
                         
-                        else if(currentRound > 200)
+                        else if(currentRound > 100)
                         	rc.researchUpgrade(Upgrade.NUKE);
                     }
                 }
@@ -46,6 +44,7 @@ public class RobotPlayer {
 
                 else if (rc.getType() == RobotType.SOLDIER) {
                     if (rc.isActive()) {
+                    	int currentRound = Clock.getRoundNum();
                     	Team myTeam = rc.getTeam();
                     	MapLocation currentLocation = rc.getLocation(); 
                     	MapLocation enemyHQLocation = rc.senseEnemyHQLocation();
@@ -67,18 +66,25 @@ public class RobotPlayer {
 
                     		
                     	
-                    	else if (Math.random()<0.05 
-							&& rc.hasUpgrade(Upgrade.PICKAXE)
+                    	else if (Math.random()<0.5 
 							&& rc.senseMine(currentLocation) == null) {
 								rc.layMine();
 						} 
                     	
                     	
                     	else { 
-							if(rc.canMove(directionToEnemyBase) && Math.random() < 0.2) {
+                    		
+                    		Robot nearRobots[] =  rc.senseNearbyGameObjects(Robot.class, 2, myTeam.opponent());
+                    		
+                    		if(nearRobots.length >= 1){
+                    			return; //don't move, let them come to me.
+                    			
+                    		}
+                    		
+                    		else if(rc.canMove(directionToEnemyBase) &&
+									(currentRound < 200 || Math.random() < 0.1)) {
 								rc.move(directionToEnemyBase);
-							}
-								
+							}	
 						}
                     }
                 }
