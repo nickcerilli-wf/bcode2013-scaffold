@@ -10,77 +10,64 @@ import battlecode.common.Team;
 import battlecode.common.Upgrade;
 
 public class RobotPlayer {
-    public static void run(RobotController rc) {
-        while (true) {
+    public static void run(RobotController rc) {    	
+    	while (true) {
             try {
             	
-                if (rc.getType() == RobotType.HQ) {
-                	int currentRound = Clock.getRoundNum();
+            	//Game Clock
+            	int currentRound = Clock.getRoundNum();
+            	
+            	
+            	//Team and robot information
+            	Team myTeam = rc.getTeam();
+            	RobotType myType = rc.getType();
+            	
+            	//Map information
+            	MapLocation currentLocation = rc.getLocation(); 
+            	MapLocation enemyHQLocation = rc.senseEnemyHQLocation();
+            	MapLocation allyHQLocation = rc.senseHQLocation();
+            	Direction directionToEnemyBase = currentLocation.directionTo(enemyHQLocation);
+            	Direction directionToAllyBase = currentLocation.directionTo(allyHQLocation);
+            	
+            	//Current Surroundings
+
+            	
+            	
+            	/////////////////////////
+            	//Instructions for the HQ
+            	/////////////////////////
+                if (myType == RobotType.HQ) {
                     if (rc.isActive()) {
-                        Direction dir = Direction.values()[(int)(Math.random()*8)];
-                        
-                        
-                        
-                        
-                        if (rc.canMove(dir) && currentRound % 10 == 0 && currentRound < 600)
-                            rc.spawn(dir);
-                        
-                        
-                        if (!rc.hasUpgrade(Upgrade.DEFUSION))
-                        	rc.researchUpgrade(Upgrade.DEFUSION);
-                        
-                        
-                        else if (!rc.hasUpgrade(Upgrade.PICKAXE))
-                        	rc.researchUpgrade(Upgrade.PICKAXE);
-                        
-                        
-                        else if(currentRound > 200)
+                        if (currentRound % 8 == 0)
                         	rc.researchUpgrade(Upgrade.NUKE);
-                    }
-                }
-                else if (rc.getType() == RobotType.ARTILLERY) {
-                    if (rc.isActive()) {
-                        //rc.attackSquare(rc.getLocation());
+                        else 
+                        	if(rc.canMove(Direction.values()[currentRound % 8]))
+                        		rc.spawn(Direction.values()[currentRound % 8]);
+                        	else{
+                        		rc.researchUpgrade(Upgrade.NUKE);
+                        		rc.yield();
+                        	}
                     }
                 }
 
+                
+            	///////////////////////////////
+            	//Instructions for the Soldier
+            	///////////////////////////////
                 else if (rc.getType() == RobotType.SOLDIER) {
-                    if (rc.isActive()) {
-                    	Team myTeam = rc.getTeam();
-                    	MapLocation currentLocation = rc.getLocation(); 
-                    	MapLocation enemyHQLocation = rc.senseEnemyHQLocation();
-                    	Direction directionToEnemyBase = currentLocation.directionTo(enemyHQLocation);
-                    	
-                    	MapLocation nextLocation = currentLocation.add(directionToEnemyBase);
-                    	
-                    	
-                    	if(rc.senseHQLocation().equals(nextLocation)){
-                    		Direction nextDirection = Direction.values()[(int)(Math.random()*8)];
-							if(rc.canMove(nextDirection)) {
-								rc.move(nextDirection);
-							}
-                    	}
-                    	
-                    	else if(rc.senseMine(nextLocation) == Team.NEUTRAL
-                    			|| rc.senseMine(nextLocation) == myTeam.opponent() )
+                	if (rc.isActive()) {
+                		MapLocation nextLocation = currentLocation.add(directionToAllyBase.opposite());
+                    	if(rc.senseMine(nextLocation) == Team.NEUTRAL
+                    			|| rc.senseMine(nextLocation) == myTeam.opponent())
                     		rc.defuseMine(nextLocation);
-
-                    		
-                    	
-                    	else if (Math.random()<0.05 
-							&& rc.hasUpgrade(Upgrade.PICKAXE)
-							&& rc.senseMine(currentLocation) == null) {
-								rc.layMine();
-						} 
-                    	
-                    	
-                    	else { 
-							if(rc.canMove(directionToEnemyBase) && Math.random() < 0.2) {
-								rc.move(directionToEnemyBase);
-							}
-								
-						}
-                    }
+                    	else if (rc.canMove(directionToAllyBase.opposite())
+                    			&& currentRound % 8 == 0)
+                    		rc.move(directionToAllyBase.opposite());
+                    	else
+                    		if(rc.senseMine(currentLocation) == null)
+                    			rc.layMine();
+                    	rc.yield();
+                	}
                 }
             } 
             catch (Exception e) {
