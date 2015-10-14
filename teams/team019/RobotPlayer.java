@@ -23,10 +23,11 @@ public class RobotPlayer {
                         
                         
                         
-                        if (rc.canMove(dir) && currentRound % 11 == 0 && currentRound < 500)
+                        if (rc.canMove(dir) && currentRound % 5 == 0 && currentRound < 500)
                             rc.spawn(dir);
                         
-                        
+                        else if (!rc.hasUpgrade(Upgrade.DEFUSION))
+                        	rc.researchUpgrade(Upgrade.DEFUSION);
                         
                         else if (!rc.hasUpgrade(Upgrade.PICKAXE))
                         	rc.researchUpgrade(Upgrade.PICKAXE);
@@ -82,7 +83,7 @@ public class RobotPlayer {
                     		}
                     		
                     		else if(rc.canMove(directionToEnemyBase) &&
-									(currentRound < 200 || Math.random() < 0.1)) {
+									(currentRound < 600 || Math.random() < 0.1)) {
 								rc.move(directionToEnemyBase);
 							}	
 						}
